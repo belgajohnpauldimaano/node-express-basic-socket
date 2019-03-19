@@ -2,4 +2,4 @@
 
 To get started\
 npm install\
-nodemon bin/www\
+nodemon bin/www
