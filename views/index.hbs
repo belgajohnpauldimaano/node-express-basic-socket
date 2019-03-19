@@ -1,0 +1,73 @@
+<h1>Socket Server & Client</h1>
+
+<div>
+    Username <input id="username">
+    <button id="registerBtn">Register</button>
+</div>
+
+<div>
+    <h3>Send message to user</h3>
+    Message <input id="privateMsg">
+    <p>socketId <input id="socketId"></p>
+    <button id="sendPrivateMsgBtn">Send</button>
+</div>
+
+<div>
+    <h3>Broadcast to all</h3>
+    Message <input id="broadcastMsg">
+    <button id="sendBroadcastBtn">Broadcast</button>
+</div>
+
+<ul id="clientList">
+
+
+</ul>
+
+<script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+    crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
+
+<script>
+    var socket = io();
+    socket.on('news', function (data) {
+        console.log(data);
+        socket.emit('my other event', { my: 'data' });
+    });
+
+    socket.on('client-list', function (data) {
+        console.log(data);
+        if (data.clients.length) {
+            const clients = data.clients.map(i => {
+                return `<li data-socketid="${i.socketId}"> Socket Id: ${i.socketId} | Username: ${i.username}</li>`
+            })
+            console.log(clients, 'clients')
+            $('#clientList').html(clients)
+        }
+    });
+
+    $('body').on('click', '#registerBtn', (e) => {
+        e.preventDefault();
+        socket.emit('register', { username: $('#username').val() })
+    })
+
+    $('body').on('click', '#sendPrivateMsgBtn', (e) => {
+        e.preventDefault();
+        socket.emit('send-private-message', { msg: `${$('#privateMsg').val()}`, toSocketId: $('#socketId').val() })
+    })
+
+    $('body').on('click', '#sendBroadcastBtn', (e) => {
+        e.preventDefault();
+        socket.emit('broadcast-message', { msg: `${$('#broadcastMsg').val()}` })
+    })
+
+
+    socket.on('private-message', (data) => {
+        alert("Message : " + data.message)
+        console.log(data, 'private-message')
+    })
+
+    socket.on('broadcast-message', (data) => {
+        alert("Broadcast message : " + data.message)
+        console.log(data, 'private-message')
+    })
+</script>
